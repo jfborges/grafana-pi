@@ -16,9 +16,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /home/pi/grafana/grafana:/var/lib/grafana
-      - /home/pi/grafana/grafana/grafana.ini:/etc/grafana/grafana.ini
-      - /home/pi/grafana/grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning:/etc/grafana/provisioning
     restart: unless-stopped
 
   prometheus:
@@ -28,37 +28,37 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - /home/pi/grafana/prometheus/config:/etc/prometheus
-      - /home/pi/grafana/prometheus/:/prometheus
+      - ./prometheus/config:/etc/prometheus
+      - ./prometheus/:/prometheus
     restart: unless-stopped
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     links:
-      - cadvisor:cadvisor
+      #      - cadvisor:cadvisor
       - node-exporter:node-exporter
 
-  cadvisor:
-    image: zcube/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - "8080:8080"
-    ipc: shareable
-    privileged: true
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-      - /var/lib/containers/:/var/lib/containers:ro
-      - /run/podman/podman.sock:/run/podman/podman.sock:rw
-      - /etc/machine-id:/etc/machine-id:ro
-    devices:
-      - /dev/kmsg:/dev/kmsg
-    restart: unless-stopped
-    security_opt:
-      - label=disable
+        #  cadvisor:
+        #    image: zcube/cadvisor:latest
+        #    container_name: cadvisor
+        #    ports:
+        #      - "8080:8080"
+        #    ipc: shareable
+        #    privileged: true
+        #    volumes:
+        #      - /:/rootfs:ro
+        #      - /var/run:/var/run:ro
+        #      - /sys:/sys:ro
+        #      - /var/lib/docker/:/var/lib/docker:ro
+        #      - /dev/disk/:/dev/disk:ro
+        #      - /var/lib/containers/:/var/lib/containers:ro
+        #      - /run/podman/podman.sock:/run/podman/podman.sock:rw
+        #      - /etc/machine-id:/etc/machine-id:ro
+        #    devices:
+        #      - /dev/kmsg:/dev/kmsg
+        #    restart: unless-stopped
+        #    security_opt:
+        #      - label=disable
 
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -83,6 +83,8 @@ services:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
+      - /tmp/:/tmp/
       - /var/log:/var/log
+      - ./promtail/config/config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
 
